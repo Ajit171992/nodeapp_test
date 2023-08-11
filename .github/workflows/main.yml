@@ -2,35 +2,54 @@ name: Publish Docker image
 
 on:
   push:
-    branches: ['master']
+    branches:
+      - master
 
- 
- 
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-      
+
       - name: Log in to Docker Hub
+        id: login
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Print debug information about the login action
+      - name: Debug Login Action
+        run: |
+          echo "Login Action Status: ${{ steps.login.outcome }}"
+          echo "Login Action Debug Output: ${{ steps.login.outputs }}"
       
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: thetips4you/testjodejsapp
+
+      # Print debug information about the metadata action
+      - name: Debug Metadata Action
+        run: |
+          echo "Metadata Action Status: ${{ steps.meta.outcome }}"
+          echo "Metadata Action Debug Output: ${{ steps.meta.outputs }}"
       
       - name: Build and push Docker image
+        id: docker_build_push
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-   
+
+      # Print debug information about the build-push action
+      - name: Debug Build-Push Action
+        run: |
+          echo "Build-Push Action Status: ${{ steps.docker_build_push.outcome }}"
+          echo "Build-Push Action Debug Output: ${{ steps.docker_build_push.outputs }}"
